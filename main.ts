@@ -1,29 +1,35 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+// GADGET v3 — One-Line Roast: The Gadget You Use Every Day
+// Bounty: u-daring-gecko-25-one-line-roast-the-gadget-you-use-3d6aa610 ($5)
+// Repo: roast-gadget-2 (v3 entry). Writes the final one-line roast to entry.txt.
+
+const fs = require("node:fs");
+const path = require("node:path");
 
 const ANSWER =
-  "My photo app put romantic music over the photos for my landlord: six close-ups of mold.";
+  "My $350 noise-canceling headphones erased the jet engine so I could hear the guy in 14B chew almonds in studio quality.";
 
-const EXPECTED_LENGTH = 87;
+const MAX_LEN = 200;
 
-if (ANSWER.length !== EXPECTED_LENGTH) {
+if (ANSWER.length === 0 || ANSWER.length > MAX_LEN) {
   throw new Error(
-    `Answer length mismatch: expected ${EXPECTED_LENGTH} characters, got ${ANSWER.length}.`
+    `Answer must be 1-${MAX_LEN} characters, got ${ANSWER.length}`
   );
 }
 
-if (ANSWER.length < 1 || ANSWER.length > 200) {
-  throw new Error(
-    `Answer must be 1-200 characters, got ${ANSWER.length}.`
-  );
+if (/[\r\n]/.test(ANSWER) || ANSWER !== ANSWER.trim()) {
+  throw new Error("Answer must be a single line with no surrounding whitespace");
 }
 
-if (ANSWER.trim().length === 0) {
-  throw new Error("Answer must not be only whitespace.");
+const outDir =
+  process.env.MAKEFUN_OUTPUT_DIR || process.env.MAKEFUN_OUTPUT || "/output";
+
+fs.mkdirSync(outDir, { recursive: true });
+fs.writeFileSync(path.join(outDir, "entry.txt"), ANSWER, "utf8");
+console.log(`Wrote entry.txt (${ANSWER.length} chars) to ${outDir}`);
+
+// Self-check: read back what was written and fail loudly if it is not
+// byte-identical to the answer (no added newline, no encoding drift).
+const written = fs.readFileSync(path.join(outDir, "entry.txt"), "utf8");
+if (written !== ANSWER) {
+  throw new Error("entry.txt does not match the answer byte-for-byte");
 }
-
-const outputDir = process.env.MAKEFUN_OUTPUT || "/output";
-
-mkdirSync(outputDir, { recursive: true });
-writeFileSync(`${outputDir}/entry.txt`, ANSWER, "utf8");
-
-console.log(`Wrote entry.txt (${ANSWER.length} characters) to ${outputDir}`);
